@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+
+
+<script type="text/javascript">
+
+    //인덱스 1=1월
+    //1월의 일수는 31일을 의미
+    var g_MONTH_DAY = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    //(7).pad(3);  //returns "007"
+    Number.prototype.pad = function(size) {
+        var s = String(this);
+        while (s.length < (size || 2)) {s = "0" + s;}
+        return s;
+    }
+
+
+
+    //b를 a로 나눈 몫 구하기
+    function q(b, a) {
+
+        if (a==0) {
+            return null;
+        }
+
+        if (a>0) {
+            return Math.floor(b/a)
+        }
+
+        if (a<0) {
+            return Math.ceil(b/a)
+        }
+    }
+
+    //b를 a로 나눈 나머지 구하기
+    function r(b, a) {
+        if (a==0) {
+            return null;
+        }
+
+        return b - a * q(b, a); 
+    }
+
+    
+        
+    //[그레고리력]: 서기 년도 yyyy는 윤년인가?
+    function isLeapYear(yyyy) {
+        var my_num = (q(yyyy, 4) - q(yyyy - 1, 4)) - (q(yyyy, 100) - q(yyyy - 1, 100)) + (q(yyyy, 400) - q(yyyy - 1, 400));
+
+        return (my_num == 1);
+    }
+
+    //[율리우스력]: 윤년인가?
+	function isJuliusLeapYear(yyyy) {
+        var my_num = (q(yyyy, 4) - q(yyyy - 1, 4));
+
+        return (my_num == 1);
+    }
+
+    //[그레고리력]:
+    //서기 1년 1월 1일부터 
+    //서기 year년 month월 day일 까지의 총일수 구하기
+    function getGregorianNumber(aYear, aMonth, aDay) {
+        var result = 0;
+        
+        result = 365 * ( aYear + q(aMonth - 3, 12) )
+                + q( aYear + q(aMonth - 3, 12), 4) 
+                - q( aYear + q(aMonth - 3, 12), 100) 
+                + q( aYear + q(aMonth - 3, 12), 400) 
+                + q(153 * (aMonth -12 * q(aMonth - 3, 12) ) - 1987, 5) + aDay; 
+        
+        return result;
+    }
+
+    //[율리우스력]:
+    //서기 1년 1월 1일부터 
+    //서기 year년 month월 day일 까지의 총일수 구하기
+    function getJuliusNumber(aYear, aMonth, aDay) {
+        var result = 0;
+        
+        result = 365 * ( aYear + q(aMonth - 3, 12) )
+                + q( aYear + q(aMonth - 3, 12), 4) 
+                + q(153 * (aMonth -12 * q(aMonth - 3, 12) ) - 1987, 5) + aDay; 
+        
+        return result;
+    }
+
+</script>
+
+
+    
+<script>
+	function printJulius(aYear) {
+		//isJuliusLeapYear
+		var month_2_day =  isJuliusLeapYear(aYear);
+		g_MONTH_DAY[2] = 28 + month_2_day;
+
+		var y = aYear;
+
+		for(var mm=1;mm<=12;mm++) {
+			for(var dd=1;dd<=g_MONTH_DAY[mm];dd++) {
+				var  julius_number = getJuliusNumber(aYear, mm, dd);
+                document.write(`n(${aYear}, ${mm.pad(2)}, ${dd.pad(2)}) = ${julius_number}<br>`);
+
+                if (aYear==1582 && mm==10 && dd==4) return;
+				//console.log(`n(${aYear}, ${mm.pad(2)}, ${dd.pad(2)}) = ${julius_number}`);
+			}
+		}
+	}
+
+	function printGregorian(aYear) {
+		//isJuliusLeapYear
+		var month_2_day =  isLeapYear(aYear);
+		g_MONTH_DAY[2] = 28 + month_2_day;
+
+		var y = aYear;
+
+		for(var mm=1;mm<=12;mm++) {
+			for(var dd=1;dd<=g_MONTH_DAY[mm];dd++) {
+				var  gregorian_number = getJuliusNumber(aYear, mm, dd);
+                document.write(`N(${aYear}, ${mm.pad(2)}, ${dd.pad(2)}) = ${gregorian_number}<br>`);
+
+                if (aYear==1582 && mm==10 && dd==14) return;
+				
+			}
+		}
+	}
+
+    function getZellerNumber(yyyy, mm, dd) {
+        if (mm<=2) {
+            yyyy = yyyy - 1;
+            mm = mm + 12;
+        }
+
+        var c = q(yyyy, 100);
+        var y = r(yyyy, 100);
+
+        var zeller_number = q(21*c, 4) + q(5*y,4) + q(13*(mm+1), 5) + dd - 1;
+
+        return zeller_number;
+    }
+
+	document.write("<h1>율리우스력</h1> <br>");
+	for (var y=0;y<=1;y++) {
+		printJulius(y);
+	}
+
+    document.write("<h1>그레고리력</h1> <br>");
+	for (var y=0;y<=1;y++) {
+		printGregorian(y);
+	}
+
+
+    console.log(`ZellerNumber(2019, 13, 1): ${getZellerNumber(2019, 13, 1)}`);
+</script>
+                
+    
+</body>
+</html>
